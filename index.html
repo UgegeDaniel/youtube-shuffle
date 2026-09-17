@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Shuffle</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <section id="loginScreen" class="screen">
+      <div class="login-card">
+        <div class="logo">▶</div>
+        <h1>YouTube Shuffle</h1>
+        <p>Stop scrolling.<br>Start watching.</p>
+        <button id="loginBtn" class="primary-btn">Continue with Google</button>
+        <p id="loginStatus" class="status"></p>
+      </div>
+    </section>
+
+    <section id="appScreen" class="screen hidden">
+      <header class="topbar">
+        <div class="brand"><span class="brand-icon">▶</span><span>YouTube Shuffle</span></div>
+        <button id="logoutBtn" class="logout-btn">Sign out</button>
+      </header>
+
+      <main>
+        <section id="homeView" class="view">
+          <div class="hero">
+            <h2>What do you feel like watching?</h2>
+            <p>Let your YouTube account decide.</p>
+            <button id="surpriseBtn" class="surprise-btn">🎰 Surprise Me</button>
+          </div>
+
+          <div class="choice-grid">
+            <button id="playlistBtn" class="choice-card">
+              <div class="choice-icon">📚</div>
+              <div><h3>My Playlists</h3><p>Pick a playlist and get a random video.</p></div>
+            </button>
+            <button id="subscriptionsBtn" class="choice-card">
+              <div class="choice-icon">👥</div>
+              <div><h3>My Subscriptions</h3><p>Pick a channel and get a random video.</p></div>
+            </button>
+          </div>
+        </section>
+
+        <section id="playlistsView" class="view hidden">
+          <div class="section-header">
+            <button class="back-btn" data-home>←</button>
+            <div><h2>Your Playlists</h2><p>Select a playlist.</p></div>
+          </div>
+          <div id="playlistsContainer" class="cards"></div>
+        </section>
+
+        <section id="subscriptionsView" class="view hidden">
+          <div class="section-header">
+            <button class="back-btn" data-home>←</button>
+            <div><h2>Your Subscriptions</h2><p>Select a channel.</p></div>
+          </div>
+          <button id="randomSubscriptionBtn" class="small-surprise">🎲 Random Channel</button>
+          <div id="subscriptionsContainer" class="cards"></div>
+        </section>
+
+        <section id="playerView" class="view hidden">
+          <div class="player-header">
+            <button class="back-btn" data-home>←</button>
+            <div><h2 id="videoTitle">Now Playing</h2><p id="videoChannel"></p></div>
+          </div>
+          <div class="player-wrapper"><div id="youtubePlayer"></div></div>
+          <div class="player-actions">
+            <button id="shuffleAgainBtn" class="surprise-btn">🎲 Shuffle Again</button>
+            <button id="homeBtn" class="secondary-btn">Home</button>
+          </div>
+        </section>
+
+        <section id="historySection">
+          <div class="history-header"><h3>Recently Played</h3><button id="clearHistoryBtn">Clear</button></div>
+          <div id="historyContainer"></div>
+        </section>
+      </main>
+    </section>
+  </div>
+
+  <script src="https://accounts.google.com/gsi/client"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
