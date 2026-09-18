@@ -9,5 +9,5 @@
 
 const CONFIG = {
   GOOGLE_CLIENT_ID: "319660254043-c6btggn7quv9ucm3fqu823fs2opinlo6.apps.googleusercontent.com",
-  YOUTUBE_API_KEY: "YOUR_YOUTUBE_API_KEY"
+  YOUTUBE_API_KEY: "AIzaSyBGKNA9uWs3KVNO7LyvENyk5E20t8pICWM"
 };
