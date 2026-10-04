@@ -6,6 +6,7 @@ let currentVideos = [];
 let player = null;
 let history = [];
 let currentVideo = null;
+let coursesPlaylist = null;
 
 /* =========================
    INITIALIZATION
@@ -41,15 +42,16 @@ function setupEvents() {
     .getElementById("subscriptionsBtn")
     ?.addEventListener("click", showSubscriptions);
 
-  document
-    .getElementById("coursesBtn")
-    ?.addEventListener("click", showCourses);
+  document.getElementById("coursesBtn")?.addEventListener("click", showCourses);
 
   document.getElementById("surpriseBtn")?.addEventListener("click", surpriseMe);
 
   document
     .getElementById("randomSubscriptionBtn")
     ?.addEventListener("click", randomSubscription);
+  document
+    .getElementById("importCourseBtn")
+    ?.addEventListener("click", importCourseButtonHandler);
 
   document
     .getElementById("shuffleAgainBtn")
@@ -273,11 +275,21 @@ async function loadUserData() {
    YOUTUBE API REQUEST
 ========================= */
 
-async function youtubeRequest(endpoint, params = {}) {
+async function youtubeRequest(endpoint, params = {}, options = {}) {
+  const method = options.method || "GET";
   if (!accessToken) {
     throw new Error("You are not authenticated with YouTube.");
   }
-
+  const fetchOptions = {
+    method,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  };
+  if (options.body) {
+    fetchOptions.headers["Content-Type"] = "application/json";
+    fetchOptions.body = JSON.stringify(options.body);
+  }
   if (!CONFIG.YOUTUBE_API_KEY || CONFIG.YOUTUBE_API_KEY.startsWith("YOUR_")) {
     throw new Error("Add your YouTube API key in config.js.");
   }
@@ -298,6 +310,7 @@ async function youtubeRequest(endpoint, params = {}) {
   console.log(`YouTube API request: ${endpoint}`, params);
 
   const response = await fetch(url, {
+    ...fetchOptions,
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
@@ -482,7 +495,102 @@ function updateRemoveButton() {
       ? "inline-block"
       : "none";
 }
+/* =========================
+   IMPORT COURSE BUTTON
+========================= */
 
+async function importCourseButtonHandler() {
+
+  const input =
+    document.getElementById(
+      "coursePlaylistInput"
+    );
+
+  const status =
+    document.getElementById(
+      "courseImportStatus"
+    );
+
+  const button =
+    document.getElementById(
+      "importCourseBtn"
+    );
+
+
+  const value =
+    input?.value.trim();
+
+
+  if (!value) {
+    if (status) {
+      status.textContent =
+        "Paste a YouTube playlist link first.";
+    }
+
+    return;
+  }
+
+
+  if (button) {
+    button.disabled = true;
+    button.textContent =
+      "⏳ Importing...";
+  }
+
+
+  if (status) {
+    status.textContent =
+      "Reading course lessons...";
+  }
+
+
+  try {
+
+    const result =
+      await importCourseFromPlaylist(
+        value
+      );
+
+
+    if (status) {
+      status.textContent =
+        `✅ ${result.courseTitle} imported — ` +
+        `${result.added} added, ` +
+        `${result.skipped} already existed` +
+        (
+          result.failed
+            ? `, ${result.failed} failed`
+            : ""
+        ) +
+        ".";
+    }
+
+
+    input.value = "";
+
+
+  } catch (error) {
+
+    console.error(
+      "Course import error:",
+      error
+    );
+
+
+    if (status) {
+      status.textContent =
+        `❌ ${apiMessage(error)}`;
+    }
+
+  } finally {
+
+    if (button) {
+      button.disabled = false;
+      button.textContent =
+        "📥 Import Course";
+    }
+  }
+}
 /* =========================
    GET SUBSCRIPTIONS
 ========================= */
@@ -619,17 +727,313 @@ async function getChannelVideos(channelId) {
   return out;
 }
 
+/* =========================
+   ADD NEW COURSES
+========================= */
+
+const COURSES_PLAYLIST_TITLE = "Courses";
+
+
+/* =========================
+   EXTRACT PLAYLIST ID
+========================= */
+
+function extractPlaylistId(input) {
+  if (!input) {
+    return null;
+  }
+
+  const value = input.trim();
+
+  // Full YouTube playlist URL
+  try {
+    const url = new URL(value);
+
+    const playlistId = url.searchParams.get("list");
+
+    if (playlistId) {
+      return playlistId;
+    }
+  } catch (error) {
+    // Not a URL — continue below.
+  }
+
+  // Raw playlist ID
+  if (
+    /^[A-Za-z0-9_-]+$/.test(value)
+  ) {
+    return value;
+  }
+
+  return null;
+}
+
+
+/* =========================
+   FIND / CREATE COURSES PLAYLIST
+========================= */
+
+async function getOrCreateCoursesPlaylist() {
+  // First check playlists already loaded.
+  let playlist = playlists.find(
+    item =>
+      item.title.trim().toLowerCase() ===
+      COURSES_PLAYLIST_TITLE.toLowerCase()
+  );
+
+  if (playlist) {
+    coursesPlaylist = playlist;
+    return playlist;
+  }
+
+
+  // Refresh playlists from YouTube.
+  playlists = await getPlaylists();
+
+  playlist = playlists.find(
+    item =>
+      item.title.trim().toLowerCase() ===
+      COURSES_PLAYLIST_TITLE.toLowerCase()
+  );
+
+  if (playlist) {
+    coursesPlaylist = playlist;
+    return playlist;
+  }
+
+
+  // Create Courses playlist.
+  const created = await youtubeRequest(
+    "playlists",
+    {
+      part: "snippet,status"
+    },
+    {
+      method: "POST",
+
+      body: {
+        snippet: {
+          title: COURSES_PLAYLIST_TITLE,
+
+          description:
+            "Courses imported into YouTube Shuffle."
+        },
+
+        status: {
+          privacyStatus: "private"
+        }
+      }
+    }
+  );
+
+
+  playlist = {
+    id: created.id,
+
+    title:
+      created.snippet?.title ||
+      COURSES_PLAYLIST_TITLE,
+
+    description:
+      created.snippet?.description ||
+      "",
+
+    thumbnail:
+      created.snippet?.thumbnails?.medium?.url ||
+      created.snippet?.thumbnails?.default?.url ||
+      "",
+
+    count:
+      created.contentDetails?.itemCount ||
+      0
+  };
+
+
+  playlists.push(playlist);
+
+  coursesPlaylist = playlist;
+
+  return playlist;
+}
+
+
+/* =========================
+   ADD VIDEO TO COURSES
+========================= */
+
+async function addVideoToCourses(
+  coursesPlaylistId,
+  videoId
+) {
+  return youtubeRequest(
+    "playlistItems",
+    {
+      part: "snippet"
+    },
+    {
+      method: "POST",
+
+      body: {
+        snippet: {
+          playlistId: coursesPlaylistId,
+
+          resourceId: {
+            kind: "youtube#video",
+
+            videoId
+          }
+        }
+      }
+    }
+  );
+}
+
+
+/* =========================
+   IMPORT COURSE
+========================= */
+
+async function importCourseFromPlaylist(
+  input
+) {
+  const sourcePlaylistId =
+    extractPlaylistId(input);
+
+  if (!sourcePlaylistId) {
+    throw new Error(
+      "That does not look like a valid YouTube playlist link."
+    );
+  }
+
+
+  // Get the source playlist.
+  const sourceData = await youtubeRequest(
+    "playlists",
+    {
+      part: "snippet,contentDetails",
+
+      id: sourcePlaylistId
+    }
+  );
+
+
+  const sourcePlaylist =
+    sourceData.items?.[0];
+
+
+  if (!sourcePlaylist) {
+    throw new Error(
+      "The playlist could not be found or is not accessible."
+    );
+  }
+
+
+  // Get every video in the source playlist.
+  const sourceVideos =
+    await getPlaylistVideos(
+      sourcePlaylistId
+    );
+
+
+  if (!sourceVideos.length) {
+    throw new Error(
+      "No videos were found in that playlist."
+    );
+  }
+
+
+  // Find or create Courses.
+  const destination =
+    await getOrCreateCoursesPlaylist();
+
+
+  // Get everything already in Courses.
+  const existingVideos =
+    await getPlaylistVideos(
+      destination.id
+    );
+
+
+  const existingIds =
+    new Set(
+      existingVideos.map(
+        video => video.id
+      )
+    );
+
+
+  let added = 0;
+  let skipped = 0;
+  let failed = 0;
+
+
+  for (const video of sourceVideos) {
+
+    // Don't duplicate videos.
+    if (existingIds.has(video.id)) {
+      skipped++;
+      continue;
+    }
+
+
+    try {
+
+      await addVideoToCourses(
+        destination.id,
+        video.id
+      );
+
+      existingIds.add(video.id);
+
+      added++;
+
+    } catch (error) {
+
+      console.error(
+        "Failed to add video:",
+        video.title,
+        error
+      );
+
+      failed++;
+    }
+  }
+
+
+  // Refresh the Courses playlist count.
+  playlists =
+    await getPlaylists();
+
+  coursesPlaylist =
+    playlists.find(
+      playlist =>
+        playlist.id === destination.id
+    ) || destination;
+
+
+  return {
+    courseTitle:
+      sourcePlaylist.snippet?.title ||
+      "Imported Course",
+
+    total:
+      sourceVideos.length,
+
+    added,
+
+    skipped,
+
+    failed
+  };
+}
+
 
 /* =========================
    RENDER COURSES
 ========================= */
 
 function renderCourses() {
-
-  const container =
-    document.getElementById(
-      "coursesContainer"
-    );
+  const container = document.getElementById("coursesContainer");
 
   if (!container) {
     return;
@@ -637,11 +1041,9 @@ function renderCourses() {
 
   container.innerHTML = "";
 
-  const courses =
-    getCoursePlaylists();
+  const courses = getCoursePlaylists();
 
   if (!courses.length) {
-
     container.innerHTML = `
       <div class="empty-state">
         <h3>📚 No saved courses yet</h3>
@@ -655,10 +1057,8 @@ function renderCourses() {
     return;
   }
 
-  courses.forEach(course => {
-
-    const card =
-      document.createElement("div");
+  courses.forEach((course) => {
+    const card = document.createElement("div");
 
     card.className = "playlist-card";
 
@@ -685,40 +1085,27 @@ function renderCourses() {
       </div>
     `;
 
-    card
-      .querySelector("button")
-      ?.addEventListener(
-        "click",
-        () => {
-          playRandomPlaylistVideo(course);
-        }
-      );
+    card.querySelector("button")?.addEventListener("click", () => {
+      playRandomPlaylistVideo(course);
+    });
 
     container.appendChild(card);
   });
 }
 
 function showCourses() {
-
   hideViews();
 
-  document
-    .getElementById("coursesView")
-    ?.classList.remove("hidden");
+  document.getElementById("coursesView")?.classList.remove("hidden");
 
   renderCourses();
 }
 
-
 function getCoursePlaylists() {
+  console.log(playlists[2]);
 
-  console.log(playlists[2])
-
-  return playlists.filter(
-    playlist =>
-      playlist.title
-        ?.toLowerCase()
-        .includes("course")
+  return playlists.filter((playlist) =>
+    playlist.title?.toLowerCase().includes("course")
   );
 }
 
