@@ -434,10 +434,10 @@ async function removeCurrentVideoFromPlaylist() {
 
     const removeButton = document.getElementById("removeFromPlaylistBtn");
 
-    if (removeButton) {
-      removeButton.disabled = true;
-      removeButton.textContent = "✅ Removed";
-    }
+    // if (removeButton) {
+    //   removeButton.disabled = true;
+    //   removeButton.textContent = "✅ Removed";
+    // }
     setTimeout(() => {
       if (currentVideos.length) {
         const nextVideo = chooseRandomVideo(currentVideos);
