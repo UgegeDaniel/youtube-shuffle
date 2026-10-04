@@ -712,7 +712,7 @@ function showCourses() {
 
 function getCoursePlaylists() {
 
-  console.log(playlists)
+  console.log(playlists[2])
 
   return playlists.filter(
     playlist =>
