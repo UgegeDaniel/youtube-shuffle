@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YouTube Shuffle</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <div class="app">
     <section id="loginScreen" class="screen">
@@ -35,15 +37,24 @@
           <div class="choice-grid">
             <button id="playlistBtn" class="choice-card">
               <div class="choice-icon">📚</div>
-              <div><h3>My Playlists</h3><p>Pick a playlist and get a random video.</p></div>
+              <div>
+                <h3>My Playlists</h3>
+                <p>Pick a playlist and get a random video.</p>
+              </div>
             </button>
             <button id="subscriptionsBtn" class="choice-card">
               <div class="choice-icon">👥</div>
-              <div><h3>My Subscriptions</h3><p>Pick a channel and get a random video.</p></div>
+              <div>
+                <h3>My Subscriptions</h3>
+                <p>Pick a channel and get a random video.</p>
+              </div>
             </button>
             <button id="coursesBtn" class="choice-card">
               <div class="choice-icon">🎓</div>
-              <div><h3>My Courses</h3><p>Pick a random course.</p></div>
+              <div>
+                <h3>Saved Courses</h3>
+                <p>Pick a random course.</p>
+              </div>
             </button>
           </div>
         </section>
@@ -51,7 +62,10 @@
         <section id="playlistsView" class="view hidden">
           <div class="section-header">
             <button class="back-btn" data-home>←</button>
-            <div><h2>Your Playlists</h2><p>Select a playlist.</p></div>
+            <div>
+              <h2>Your Playlists</h2>
+              <p>Select a playlist.</p>
+            </div>
           </div>
           <div id="playlistsContainer" class="cards"></div>
         </section>
@@ -59,35 +73,58 @@
         <section id="subscriptionsView" class="view hidden">
           <div class="section-header">
             <button class="back-btn" data-home>←</button>
-            <div><h2>Your Subscriptions</h2><p>Select a channel.</p></div>
+            <div>
+              <h2>Your Subscriptions</h2>
+              <p>Select a channel.</p>
+            </div>
           </div>
           <button id="randomSubscriptionBtn" class="small-surprise">🎲 Random Channel</button>
           <div id="subscriptionsContainer" class="cards"></div>
         </section>
+        <section id="coursesView" class="view hidden">
 
+          <div class="section-header">
+            <button class="back-btn" data-home>←</button>
+
+            <div>
+              <h2>📚 Saved Courses</h2>
+              <p>Choose a course to start learning.</p>
+            </div>
+          </div>
+
+          <div id="coursesContainer" class="playlist-grid"></div>
+
+        </section>
         <section id="playerView" class="view hidden">
           <div class="player-header">
             <button class="back-btn" data-home>←</button>
-            <div><h2 id="videoTitle">Now Playing</h2><p id="videoChannel"></p></div>
+            <div>
+              <h2 id="videoTitle">Now Playing</h2>
+              <p id="videoChannel"></p>
+            </div>
           </div>
-          <div class="player-wrapper"><div id="youtubePlayer"></div></div>
-        <div class="player-actions">
-          <button id="shuffleAgainBtn" class="surprise-btn">
-            🎲 Shuffle Again
-          </button>
-        
-          <button id="removeFromPlaylistBtn" class="danger-btn">
-            🗑 Remove from Playlist
-          </button>
-        
-          <button id="homeBtn" class="secondary-btn">
-            Home
-          </button>
-        </div>
+          <div class="player-wrapper">
+            <div id="youtubePlayer"></div>
+          </div>
+          <div class="player-actions">
+            <button id="shuffleAgainBtn" class="surprise-btn">
+              🎲 Shuffle Again
+            </button>
+
+            <button id="removeFromPlaylistBtn" class="danger-btn">
+              🗑 Remove from Playlist
+            </button>
+
+            <button id="homeBtn" class="secondary-btn">
+              Home
+            </button>
+          </div>
         </section>
 
         <section id="historySection">
-          <div class="history-header"><h3>Recently Played</h3><button id="clearHistoryBtn">Clear</button></div>
+          <div class="history-header">
+            <h3>Recently Played</h3><button id="clearHistoryBtn">Clear</button>
+          </div>
           <div id="historyContainer"></div>
         </section>
       </main>
@@ -99,4 +136,5 @@
   <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
+
 </html>

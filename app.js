@@ -41,6 +41,10 @@ function setupEvents() {
     .getElementById("subscriptionsBtn")
     ?.addEventListener("click", showSubscriptions);
 
+  document
+    .getElementById("coursesBtn")
+    ?.addEventListener("click", showCourses);
+
   document.getElementById("surpriseBtn")?.addEventListener("click", surpriseMe);
 
   document
@@ -613,6 +617,107 @@ async function getChannelVideos(channelId) {
   } while (pageToken);
 
   return out;
+}
+
+
+/* =========================
+   RENDER COURSES
+========================= */
+
+function renderCourses() {
+
+  const container =
+    document.getElementById(
+      "coursesContainer"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = "";
+
+  const courses =
+    getCoursePlaylists();
+
+  if (!courses.length) {
+
+    container.innerHTML = `
+      <div class="empty-state">
+        <h3>📚 No saved courses yet</h3>
+        <p>
+          Courses represented by your YouTube
+          playlists will appear here.
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+  courses.forEach(course => {
+
+    const card =
+      document.createElement("div");
+
+    card.className = "playlist-card";
+
+    card.innerHTML = `
+      <img
+        src="${escapeHTML(course.thumbnail)}"
+        alt=""
+      >
+
+      <div class="playlist-card-content">
+
+        <h3>
+          ${escapeHTML(course.title)}
+        </h3>
+
+        <p>
+          ${course.count || 0} videos
+        </p>
+
+        <button class="surprise-btn">
+          🎲 Shuffle Course
+        </button>
+
+      </div>
+    `;
+
+    card
+      .querySelector("button")
+      ?.addEventListener(
+        "click",
+        () => {
+          playRandomPlaylistVideo(course);
+        }
+      );
+
+    container.appendChild(card);
+  });
+}
+
+function showCourses() {
+
+  hideViews();
+
+  document
+    .getElementById("coursesView")
+    ?.classList.remove("hidden");
+
+  renderCourses();
+}
+
+
+function getCoursePlaylists() {
+
+  return playlists.filter(
+    playlist =>
+      playlist.title
+        ?.toLowerCase()
+        .includes("course")
+  );
 }
 
 /* =========================
