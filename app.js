@@ -24,7 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-
 /* =========================
    EVENTS
 ========================= */
@@ -366,7 +365,6 @@ async function getPlaylists() {
   return out;
 }
 
-
 async function removeCurrentVideoFromPlaylist() {
   if (!currentVideo?.playlistItemId) {
     alert("This video cannot be removed from a playlist.");
@@ -378,85 +376,105 @@ async function removeCurrentVideoFromPlaylist() {
     return;
   }
 
-  const confirmed = confirm(
-    `Remove "${currentVideo.title}" from this playlist?`
-  );
+  const title = currentVideo.title || "this video";
 
-  if (!confirmed) {
-    return;
-  }
+  // const confirmed = confirm(
+  //   `Remove "${title}" from this playlist?`
+  // );
+
+  // if (!confirmed) {
+  //   return;
+  // }
 
   try {
-    const url = new URL(
-      "https://www.googleapis.com/youtube/v3/playlistItems"
-    );
+    const url = new URL("https://www.googleapis.com/youtube/v3/playlistItems");
 
-    url.searchParams.set(
-      "id",
-      currentVideo.playlistItemId
-    );
+    url.searchParams.set("id", currentVideo.playlistItemId);
 
     const response = await fetch(url, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
 
     if (!response.ok) {
       const text = await response.text();
 
-      console.error(
-        "Remove from playlist failed:",
-        response.status,
-        text
-      );
+      console.error("Remove from playlist failed:", response.status, text);
 
-      throw new Error(
-        text || `YouTube API error ${response.status}`
-      );
+      throw new Error(text || `YouTube API error ${response.status}`);
     }
 
     // Remove it from the current local video list
     currentVideos = currentVideos.filter(
-      video => video.id !== currentVideo.id
+      (video) => video.id !== currentVideo.id
     );
 
     // Remove it from the local playlist count
-    const playlist = playlists.find(
-      item => item.id === currentSource.id
-    );
+    const playlist = playlists.find((item) => item.id === currentSource.id);
 
     if (playlist && playlist.count > 0) {
       playlist.count--;
     }
 
-    alert("Video removed from the playlist.");
+    // alert("Video removed from the playlist.");
+    const titleElement = document.getElementById("videoTitle");
+    if (titleElement) {
+      titleElement.textContent = "✅ Video removed from playlist";
+    }
+
+    const channelElement = document.getElementById("videoChannel");
+    if (channelElement) {
+      channelElement.textContent = title;
+    }
 
     currentVideo = null;
-
     showHome();
 
+    const removeButton = document.getElementById("removeFromPlaylistBtn");
+
+    if (removeButton) {
+      removeButton.disabled = true;
+      removeButton.textContent = "✅ Removed";
+    }
+    setTimeout(() => {
+      if (currentVideos.length) {
+        const nextVideo = chooseRandomVideo(currentVideos);
+
+        if (nextVideo) {
+          playVideo(nextVideo);
+        }
+      } else {
+        if (titleElement) {
+          titleElement.textContent = "Playlist is empty";
+        }
+
+        if (channelElement) {
+          channelElement.textContent = "No more videos available.";
+        }
+
+        const playerElement = document.getElementById("youtubePlayer");
+
+        if (playerElement) {
+          playerElement.innerHTML = "";
+        }
+      }
+    }, 1200);
   } catch (error) {
-    console.error(
-      "Remove from playlist error:",
-      error
-    );
+    console.error("Remove from playlist error:", error);
 
     alert(apiMessage(error));
   }
 }
 
 function updateRemoveButton() {
-  const button = document.getElementById(
-    "removeFromPlaylistBtn"
-  );
+  const button = document.getElementById("removeFromPlaylistBtn");
 
   if (!button) return;
 
   button.style.display =
-    currentSource?.type === "playlist" &&
-    currentVideo?.playlistItemId
+    currentSource?.type === "playlist" && currentVideo?.playlistItemId
       ? "inline-block"
       : "none";
 }
@@ -856,7 +874,7 @@ function playVideo(video) {
     return;
   }
   currentVideo = video;
-  updateRemoveButton();
+
   hideViews();
 
   document.getElementById("playerView")?.classList.remove("hidden");

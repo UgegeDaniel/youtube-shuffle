@@ -392,3 +392,24 @@ main {
     background: #ff0033;
     color: #fff;
 }
+
+.danger-btn {
+    padding: 15px 22px;
+    border-radius: 10px;
+    border: 1px solid #ff0033;
+    background: transparent;
+    color: #ff0033;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.danger-btn:hover {
+    background: #ff0033;
+    color: white;
+}
+
+.danger-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
