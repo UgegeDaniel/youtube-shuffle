@@ -378,3 +378,17 @@ main {
     height: 100%;
     border: 0;
 }
+
+.danger-btn {
+    border: 1px solid #ff0033;
+    padding: 15px 22px;
+    border-radius: 10px;
+    background: transparent;
+    color: #ff0033;
+    font-weight: 700;
+}
+
+.danger-btn:hover {
+    background: #ff0033;
+    color: #fff;
+}
