@@ -712,6 +712,8 @@ function showCourses() {
 
 function getCoursePlaylists() {
 
+  console.log(playlists)
+
   return playlists.filter(
     playlist =>
       playlist.title
