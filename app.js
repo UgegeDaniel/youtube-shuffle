@@ -430,7 +430,7 @@ async function removeCurrentVideoFromPlaylist() {
     }
 
     currentVideo = null;
-    showHome();
+    // showHome();
 
     const removeButton = document.getElementById("removeFromPlaylistBtn");
 
