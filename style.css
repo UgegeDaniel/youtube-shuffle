@@ -413,3 +413,60 @@ main {
     opacity: 0.6;
     cursor: default;
 }
+
+.course-import {
+    margin-top: 24px;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.course-import h2 {
+    margin: 0 0 8px;
+}
+
+.course-import p {
+    margin: 0 0 16px;
+    opacity: 0.75;
+}
+
+.course-import-row {
+    display: flex;
+    gap: 10px;
+}
+
+#coursePlaylistInput {
+    flex: 1;
+    min-width: 0;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    color: inherit;
+    outline: none;
+}
+
+#coursePlaylistInput:focus {
+    border-color: currentColor;
+}
+
+.course-import-status {
+    margin-top: 14px;
+    white-space: pre-wrap;
+}
+
+#importCourseBtn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+@media (max-width: 600px) {
+    .course-import-row {
+        flex-direction: column;
+    }
+
+    #importCourseBtn {
+        width: 100%;
+    }
+}
