@@ -103,7 +103,7 @@ function login() {
     client_id: CONFIG.GOOGLE_CLIENT_ID,
 
     scope:
-      "openid profile email https://www.googleapis.com/auth/youtube.readonly",
+      "openid profile email https://www.googleapis.com/auth/youtube",
 
     callback: async response => {
       if (response?.access_token) {
